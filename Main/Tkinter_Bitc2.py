@@ -1,11 +1,56 @@
+# Get from Sentdex visit SentDex channel on GitHub for more information
+# This code comes from the video series of tkinter by SentDex
+# visit
+# https://www.youtube.com/channel/UCfzlCWGWYyIQ0aLC5w48gBQ
+
 import tkinter as tk
 from tkinter import ttk
+
 import matplotlib
 matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
+from matplotlib import style
+
+import urllib
+import json
+import pandas as pd
+import numpy as np
 
 
 LARGE_FONT = ("Verdana", 12)
+style.use("ggplot")
+
+
+#amimation function
+#live graph channel
+
+f = Figure(figsize=(5,5), dpi=100)
+a = f.add_subplot(111) # means only one chart
+
+
+def animate(i):
+    pullData = open("sampledata.txt", "r").read()
+    dataList = pullData.split('\n')
+    xList = []
+    yList = []
+    for eachLine in dataList:
+        if len(eachLine)>1:
+            x,y = eachLine.split(',')
+            xList.append(int(x))
+            yList.append(int(y))
+
+    a.clear()
+    a.plot(xList,yList)
+
+
+
+
+
+
+
+#style.use("dark_background")
 
 class SeaofBTapp(tk.Tk): # is an inheritance not a parameter Tk class within tkinter
 
@@ -30,7 +75,7 @@ class SeaofBTapp(tk.Tk): # is an inheritance not a parameter Tk class within tki
 
         self.frames = {} # insieme di tutti i frame
 
-        for F in (StartPage, PageOne, PageTwo):
+        for F in (StartPage, BTCe_Page): ###AGGIUNGI QUI LE PAGINE *****
             frame = F(container, self)
             self.frames[F]=frame
             frame.grid(row=0, column=0, sticky='nsew')
@@ -47,14 +92,20 @@ class StartPage(tk.Frame):  # sono obbligato a fare una classe perchè deve ered
     def __init__(self, parent, controller):
 
         ttk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text="start page", font= LARGE_FONT)
+        label = ttk.Label(self, text=""" ALPHA bitcoin trading application 
+        use at your own risk there is no promise of warranty
+        """, font= LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        button1 = ttk.Button(self, text="Visit Page One", command= lambda: controller.show_frame(PageOne))
+        button1 = ttk.Button(self, text="Agree",
+                             command= lambda: controller.show_frame(BTCe_Page))
         button1.pack()
 
-        button2 = ttk.Button(self, text="Visiti Page Two", command= lambda: controller.show_frame(PageTwo))
+        button2 = ttk.Button(self, text="Disagree",
+                             command= quit)
         button2.pack()
+
+
 
 class PageOne(tk.Frame):  # sono obbligato a fare una classe perchè deve ereditare tk.Frame
 
@@ -66,25 +117,40 @@ class PageOne(tk.Frame):  # sono obbligato a fare una classe perchè deve eredit
         button1 = ttk.Button(self, text="Visit Start Page", command= lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        button2 = ttk.Button(self, text="Visiti Page Two", command= lambda: controller.show_frame(PageTwo))
-        button2.pack()
 
 
-
-class PageTwo(tk.Frame):  # sono obbligato a fare una classe perchè deve ereditare tk.Frame
+class BTCe_Page(tk.Frame):  # sono obbligato a fare una classe perchè deve ereditare tk.Frame
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)   # questo non ho capito perché devo farlo
-        label = ttk.Label(self, text="Page Two", font= LARGE_FONT)
+        label = ttk.Label(self, text="BTCe_Page", font= LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        button1 = ttk.Button(self, text="Visit Start Page", command= lambda: controller.show_frame(StartPage))
+        button1 = ttk.Button(self, text="Back to Home", command= lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        button2 = ttk.Button(self, text="Visiti Page One", command= lambda: controller.show_frame(PageOne))
-        button2.pack()
+        # f = Figure(figsize=(5,5), dpi=100)
+        # a = f.add_subplot(111) # means only one chart
+        # le due funzioni sopra sono state portate all inizio del codice
+        # a.plot([1,2,3,4,5,6,7,8],[5,6,8,4,2,3,7,1])
+
+        canvas = FigureCanvasTkAgg(f, self)
+        canvas.draw()    #corretto da SentDex canvas.show() aggiornamento
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        #we add navigation bar
+        toolbar = NavigationToolbar2Tk(canvas, self)
+        toolbar.update()
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+
+
+
+
+
 
 app = SeaofBTapp() # it's like to do app= tk.TK()
+ani = animation.FuncAnimation(f, animate, interval=1000)
 app.mainloop()
 
 
